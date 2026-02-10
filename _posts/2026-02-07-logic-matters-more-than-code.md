@@ -5,11 +5,10 @@ categories: [Product, AI]
 tags: [product-management, ai, building, claude-code]
 ---
 
-[🇬🇧 English](#english) | [🇨🇳 中文](#chinese)
+[🇬🇧 English](#-english-version) | [🇨🇳 中文](#-中文版本)
 
 ---
 
-<div id="english"></div>
 ## 🇬🇧 English Version
 
 # The Logic Matters More Than the Code: A PM's Journey Into Building With AI
@@ -173,7 +172,6 @@ It's the PM's job now. And it turns out, it always was.
 
 ---
 
-<div id="chinese"></div>
 ## 🇨🇳 中文版本
 
 # 逻辑比代码重要：一个产品经理开始自己写代码的故事
