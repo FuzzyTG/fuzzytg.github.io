@@ -5,11 +5,10 @@ categories: [AI, Product]
 tags: [ai-agents, openclaw, automation, productivity]
 ---
 
-[🇬🇧 English](#english) | [🇨🇳 中文](#chinese)
+[🇬🇧 English](#-english-version) | [🇨🇳 中文](#-中文版本)
 
 ---
 
-<div id="english"></div>
 ## 🇬🇧 English Version
 
 # Building with OpenClaw: What I Learned About AI Agents
@@ -97,7 +96,6 @@ This is why I use OpenClaw — it helps me focus on what truly matters, while ha
 
 ---
 
-<div id="chinese"></div>
 ## 🇨🇳 中文版本
 
 # OpenClaw 让我看到的：AI Agent 的可能性
