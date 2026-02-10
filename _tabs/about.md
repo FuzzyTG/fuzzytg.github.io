@@ -25,3 +25,19 @@ A whetstone sharpens tools. Thinking sharpens products. Both require friction.
 ---
 
 *Currently building Spar — an iOS app that sharpens fuzzy thinking through confrontational AI dialogue.*
+
+---
+
+## Copyright & License
+
+© 2026 Alex (FuzzyTG). All Rights Reserved.
+
+**Content Policy:**
+- The written content (articles, text, images) of this blog is copyrighted and may NOT be republished or redistributed without explicit permission.
+- You may quote short excerpts with proper attribution and a link back to the original post.
+
+**Code Policy:**
+- The Jekyll theme and site structure are open source (MIT License) for learning purposes.
+- You may fork the repository to learn from the code structure, but please do not copy the content.
+
+**Questions?** Contact me via [GitHub](https://github.com/FuzzyTG) or [X/Twitter](https://x.com/alex_yuan).
