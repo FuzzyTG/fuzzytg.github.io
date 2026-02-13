@@ -1,3 +1,16 @@
+---
+title: "Planning Is the Product"
+date: 2026-02-13 23:00:00 +0800
+categories: [Product, AI]
+tags: [product-management, ai, building, planning, testing]
+---
+
+[🇬🇧 English](#-english-version) | [🇨🇳 中文](#-中文版本)
+
+---
+
+## 🇬🇧 English Version
+
 # Planning Is the Product: What 4 Hours of AI Planning Taught Me About Shipping Features
 
 > **TL;DR**: Spent 4 hours planning (zero code) before building Spar's subscription feature. Found a WebSocket trap AI would've hit at 2am. Made 8 architectural decisions explicit so the agent doesn't guess wrong. Wrote 78 tests to define "done." Planning isn't prep—it's the product. *(~4 min read)*
@@ -124,6 +137,8 @@ That's a very different thing. And the difference is entirely in the planning.
 *Planning is where the leverage is. Execution can be automated.*
 
 ---
+
+## 🇨🇳 中文版本
 
 # 规划才是真正的产品
 
