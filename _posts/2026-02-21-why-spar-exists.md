@@ -115,8 +115,6 @@ Not destroyed. Sharpened.
 
 That's what Spar does.
 
-[Download Spar] [TestFlight Link]
-
 ---
 
 ## 🇨🇳 中文版本
@@ -224,5 +222,3 @@ Spar 就是那个思考伙伴。
 不是被摧毁。是被磨练。
 
 这就是 Spar 做的事。
-
-[下载 Spar] [TestFlight 链接]
