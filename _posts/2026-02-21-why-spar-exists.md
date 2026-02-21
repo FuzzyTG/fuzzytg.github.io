@@ -1,6 +1,6 @@
 ---
 title: "Why Spar Exists: The Case for Confrontational AI"
-date: 2026-02-21 16:00:00 +0800
+date: 2026-02-21 15:00:00 +0800
 categories: [Product, Spar]
 tags: [spar, ai, product, thinking, confrontational-ai]
 ---
