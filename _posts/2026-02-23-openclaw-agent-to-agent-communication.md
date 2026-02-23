@@ -4,6 +4,11 @@ date: 2026-02-23
 tags: [openclaw, multi-agent, automation]
 ---
 
+[🇬🇧 English](#-english-version) | [🇨🇳 中文](#-中文版本)
+
+---
+
+## 🇬🇧 English Version
 
 **TL;DR:** Telegram bots can't see each other's messages in groups (API limitation). Use OpenClaw's built-in `sessions_send` tool instead. Enable two settings: `agentToAgent.enabled: true` and `sessions.visibility: "all"`.
 
@@ -154,6 +159,8 @@ This isn't a bug — it's how LLMs work. Treat A2A instructions like you'd treat
 *Tested on OpenClaw v2026.2.x. This behavior may change in future versions.*
 
 ---
+
+## 🇨🇳 中文版本
 
 # 如何在 OpenClaw 中配置 Agent 间通信
 
