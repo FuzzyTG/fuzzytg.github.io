@@ -12,7 +12,7 @@ tags: [openclaw, multi-agent, cron, automation]
 
 # Multi-Agent Cron Job Delivery: How to Route Messages to the Right Bot
 
-**TL;DR:** In a multi-agent OpenClaw setup, cron job delivery has a subtle gotcha: the `announce` flow always sends from the default bot, regardless of which agent ran the job. For non-default agents (Agent Beta, Agent Gamma, etc.), you need `delivery.mode: "none"` + explicit `message` tool calls with `accountId`. This post documents the problem, the fix, and the patterns we landed on after 21 cron jobs and 3 painful restarts.
+**TL;DR:** In a multi-agent OpenClaw setup, cron job delivery has a subtle gotcha: the `announce` flow always sends from the default bot, regardless of which agent ran the job. For non-default agents, you need `delivery.mode: "none"` + explicit `message` tool calls with `accountId`. This post documents the problem, the fix, and the patterns we landed on after 21 cron jobs and 3 painful restarts.
 
 ---
 
@@ -20,15 +20,15 @@ tags: [openclaw, multi-agent, cron, automation]
 
 I run a multi-agent OpenClaw system with three agents:
 
-- **Agent Alpha** (main/default) — daily operations, heartbeat checks, AI news digest
-- **Agent Beta** — scheduled reports, stock alerts, expense tracking
-- **Agent Gamma** — technical monitoring, security scans
+- **Agent Alpha** (default) — daily operations, heartbeat checks
+- **Agent Beta** — scheduled reports, alerts
+- **Agent Gamma** — monitoring, scans
 
-Each agent has its own Telegram bot. When Agent Beta sends a stock update, it should come from the Agent Beta bot. When Agent Alpha sends a weather report, it comes from the Agent Alpha bot. Simple enough, right?
+Each agent has its own Telegram bot. When Agent Beta sends a report, it should come from the Bot B. When Agent Alpha sends a notification, it comes from the Bot A. Simple enough, right?
 
 ## The Problem
 
-Cron jobs in OpenClaw support an `agentId` field. You'd expect that setting `agentId: "beta"` would make the message come from the Agent Beta bot. It doesn't — at least not through the default delivery path.
+Cron jobs in OpenClaw support an `agentId` field. You'd expect that setting `agentId: "beta"` would make the message come from the Bot B. It doesn't — at least not through the default delivery path.
 
 Here's why:
 
@@ -37,13 +37,13 @@ OpenClaw has two delivery paths for isolated cron job responses:
 1. **Direct outbound** — triggered when the response contains structured content (media, channel data) or targets a forum thread
 2. **Announce flow** — used for all text-only responses
 
-The announce flow **does not respect per-agent channel-account bindings**. It always delivers using the default agent's bot token. So if your Agent Beta agent produces a beautiful scheduled report, it arrives in Telegram from the Agent Alpha bot. Your users see the wrong identity. Confusion ensues.
+The announce flow **does not respect per-agent channel-account bindings**. It always delivers using the default agent's bot token. So if your secondary agent produces a beautiful report, it arrives in Telegram from the Bot A. Your users see the wrong identity. Confusion ensues.
 
 ## The Fix
 
 The solution is straightforward once you know the constraint:
 
-- **Default agent (Agent Alpha):** Use `delivery.mode: "announce"` — it works correctly because the default bot IS the main agent's bot
+- **Default agent (Alpha):** Use `delivery.mode: "announce"` — it works correctly because the default bot IS the main agent's bot
 - **Any other agent:** Use `delivery.mode: "none"` and have the agent send via the `message` tool with explicit `accountId`
 
 ### Pattern A: Main Agent (Simple)
@@ -75,7 +75,7 @@ The agent produces a response. The system delivers it. Done.
   "wakeMode": "now",
   "payload": {
     "kind": "agentTurn",
-    "message": "## Delivery Instructions\nUse message tool:\n- action: send\n- channel: telegram\n- accountId: beta\n- target: 123456789\n\nAfter sending, reply NO_REPLY.\n\n## Task\nGenerate today's ACME scheduled report."
+    "message": "## Delivery Instructions\nUse message tool:\n- action: send\n- channel: telegram\n- accountId: beta\n- target: 123456789\n\nAfter sending, reply NO_REPLY.\n\n## Task\nGenerate today's scheduled report."
   },
   "delivery": {
     "mode": "none"
@@ -145,7 +145,7 @@ Never deploy a recurring cron job without testing first:
 
 ```json
 {
-  "name": "Test Agent Beta delivery",
+  "name": "Test Beta delivery",
   "deleteAfterRun": true,
   "schedule": {
     "kind": "at",
@@ -164,7 +164,7 @@ Never deploy a recurring cron job without testing first:
 
 Check three things:
 1. ✅ Message arrived on Telegram
-2. ✅ Sent from the correct bot (Agent Beta, not Agent Alpha)
+2. ✅ Sent from the correct bot (Bot B, not Bot A)
 3. ✅ Delivered to the correct chat
 
 Only then convert to a recurring schedule.
@@ -186,7 +186,7 @@ Five rules to remember:
 
 ## The Cost of Getting This Wrong
 
-We configured 21 cron jobs across 3 agents. The first attempt had Agent Beta jobs using `announce` mode — every scheduled report arrived from the Agent Alpha bot. Users couldn't tell which agent was talking. We also tried putting `accountId` in the delivery object, which was silently ignored. Three restarts and a lot of debugging later, we landed on the patterns above.
+We configured 21 cron jobs across 3 agents. The first attempt had Beta jobs using `announce` mode — every scheduled report arrived from the Bot A. Users couldn't tell which agent was talking. We also tried putting `accountId` in the delivery object, which was silently ignored. Three restarts and a lot of debugging later, we landed on the patterns above.
 
 The underlying issue is a reasonable architectural choice: the announce flow is a convenience feature that routes through the default bot. It's not broken — it's just not designed for multi-agent identity. Once you know that, the workaround is clean and reliable.
 
@@ -198,7 +198,7 @@ Document your patterns. Test before deploying. And never trust a field name that
 
 # Multi-Agent Cron Job 消息路由：如何确保消息从正确的 Bot 发送
 
-**一句话总结：** 在多 Agent 的 OpenClaw 系统中，cron job 的 `announce` 模式总是通过默认 bot 发送，不管实际执行的是哪个 agent。非默认 agent（如 Agent Beta、Agent Gamma）必须用 `delivery.mode: "none"` + `message` tool 手动发送，并指定 `accountId`。本文记录了踩坑过程和最终方案。
+**一句话总结：** 在多 Agent 的 OpenClaw 系统中，cron job 的 `announce` 模式总是通过默认 bot 发送，不管实际执行的是哪个 agent。非默认 agent必须用 `delivery.mode: "none"` + `message` tool 手动发送，并指定 `accountId`。本文记录了踩坑过程和最终方案。
 
 ---
 
@@ -206,28 +206,28 @@ Document your patterns. Test before deploying. And never trust a field name that
 
 我跑了一个三 agent 的 OpenClaw 系统：
 
-- **Agent Alpha**（主 agent）— 日常运营、心跳检查、AI 日报
-- **Agent Beta** — 定期报告、播报、记账提醒
-- **Agent Gamma** — 技术监控、安全扫描
+- **Agent Alpha**（默认 agent）— 日常运营、心跳检查
+- **Agent Beta** — 定期报告、提醒
+- **Agent Gamma** — 监控、扫描
 
-每个 agent 对应一个独立的 Telegram bot。Agent Beta 发播报，应该从 Agent Beta bot 出来。Agent Alpha 发天气预报，从 Agent Alpha bot 出来。逻辑很清楚。
+每个 agent 对应一个独立的 Telegram bot。Agent Beta 发报告，应该从 Bot B 出来。Agent Alpha 发通知，从 Bot A 出来。逻辑很清楚。
 
 ## 问题
 
-Cron job 支持 `agentId` 字段。直觉上，设了 `agentId: "beta"` 消息就该从 Agent Beta bot 发出。但实际不是。
+Cron job 支持 `agentId` 字段。直觉上，设了 `agentId: "beta"` 消息就该从 Bot B 发出。但实际不是。
 
 OpenClaw 的 isolated cron job 有两条投递路径：
 
 1. **Direct outbound** — 响应包含结构化内容（媒体、频道数据）或目标是论坛帖子时触发
 2. **Announce flow** — 所有纯文本响应走这条路
 
-Announce flow **不区分 agent 的 channel-account 绑定**，始终用默认 agent 的 bot token 发送。结果就是：Agent Beta 精心生成的股票报告，从 Agent Alpha bot 发出来了。
+Announce flow **不区分 agent 的 channel-account 绑定**，始终用默认 agent 的 bot token 发送。结果就是：Agent Beta 精心生成的报告，从 Bot A 发出来了。
 
 ## 解决方案
 
 知道了原因，方案很直接：
 
-- **默认 agent（Agent Alpha）：** 用 `delivery.mode: "announce"` — 默认 bot 就是主 agent 的 bot，没问题
+- **默认 agent（Alpha）：** 用 `delivery.mode: "announce"` — 默认 bot 就是主 agent 的 bot，没问题
 - **其他 agent：** 用 `delivery.mode: "none"`，让 agent 通过 `message` tool 发送，指定 `accountId`
 
 ### 模式 A：主 Agent（简单）
@@ -259,7 +259,7 @@ Agent 生成响应，系统自动投递。完事。
   "wakeMode": "now",
   "payload": {
     "kind": "agentTurn",
-    "message": "## 发送方式\n用 message tool 发送：\n- action: send\n- channel: telegram\n- accountId: beta\n- target: 123456789\n\n发送完回复 NO_REPLY。\n\n## 任务\n生成今日 ACME 播报。"
+    "message": "## 发送方式\n用 message tool 发送：\n- action: send\n- channel: telegram\n- accountId: beta\n- target: 123456789\n\n发送完回复 NO_REPLY。\n\n## 任务\n生成今日 每日播报。"
   },
   "delivery": { "mode": "none" }
 }
@@ -327,7 +327,7 @@ Delivery schema 设了 `additionalProperties: false`，未知字段被静默丢�
 
 ```json
 {
-  "name": "测试 Agent Beta 投递",
+  "name": "测试 Beta 投递",
   "deleteAfterRun": true,
   "schedule": {
     "kind": "at",
@@ -346,7 +346,7 @@ Delivery schema 设了 `additionalProperties: false`，未知字段被静默丢�
 
 验证三件事：
 1. ✅ Telegram 收到消息
-2. ✅ 从正确的 bot 发送（Agent Beta，不是 Agent Alpha）
+2. ✅ 从正确的 bot 发送（Bot B，不是 Bot A）
 3. ✅ 发到正确的聊天
 
 通过后再改成定期任务。
@@ -368,7 +368,7 @@ Delivery schema 设了 `additionalProperties: false`，未知字段被静默丢�
 
 ## 代价
 
-我们配了 21 个 cron job，横跨 3 个 agent。第一次尝试 Agent Beta 的 job 全用了 `announce` — 所有定期报告都从 Agent Alpha bot 发出来。还试过在 delivery 里加 `accountId`，被静默忽略。三次重启、大量调试之后，才定下了上面的方案。
+我们配了 21 个 cron job，横跨 3 个 agent。第一次尝试 Beta 的 job 全用了 `announce` — 所有定期报告都从 Bot A 发出来。还试过在 delivery 里加 `accountId`，被静默忽略。三次重启、大量调试之后，才定下了上面的方案。
 
 根本原因其实是一个合理的架构选择：announce flow 是个便利功能，走默认 bot 通道。它没坏 — 只是不是为多 agent 身份设计的。知道这一点后，workaround 干净可靠。
 
