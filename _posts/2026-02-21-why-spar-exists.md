@@ -3,7 +3,6 @@ title: "Why SPAR Exists"
 date: 2026-02-21 15:00:00 +0800
 categories: [Product, Spar]
 tags: [spar, ai, product, thinking, memory, confrontational-ai]
-pin: true
 ---
 
 [🇬🇧 English](#-english-version) | [🇨🇳 中文](#-中文版本)
